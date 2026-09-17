@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risponditore | Risposte e contatti</title>
+<link rel="stylesheet" href="app.css?v=3">
+</head>
+
+<body>
+    <header class="app-header">
+        <button class="brand" type="button" data-view-target="responses">Risponditore</button>
+        <nav class="primary-nav" aria-label="Sezioni principali">
+            <button class="nav-button active" type="button" data-view-target="responses" aria-current="page">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h10l2 2V21H6z"/><path d="M16 3.5V7h3M9 11h6M9 15h6"/></svg>
+                Risposte
+            </button>
+            <button class="nav-button" type="button" data-view-target="contacts" aria-current="false">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.2"/><path d="M3.5 20c.4-4 2.1-6 5.5-6s5.1 2 5.5 6M14 15c3.8-.6 6 1.1 6.5 4"/></svg>
+                Contatti esterni
+            </button>
+        </nav>
+    </header>
+
+    <main class="app-main">
+        <section class="app-view" data-view="responses" aria-labelledby="responses-heading">
+            <div class="page-heading">
+                <h1 id="responses-heading">Risposte</h1>
+                <p>Cerca la richiesta del cliente e copia la risposta corretta.</p>
+            </div>
+            <div class="toolbar">
+                <label class="search-control" for="response-search">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+                    <span class="visually-hidden">Cerca nelle risposte</span>
+                    <input id="response-search" type="search" placeholder="Cerca parole dalla richiesta del cliente" autocomplete="off">
+                    <kbd aria-hidden="true">/</kbd>
+                </label>
+            </div>
+            <div class="filter-bar" id="response-filters" aria-label="Filtra risposte per categoria"></div>
+            <div class="workspace-grid">
+                <section class="panel" aria-labelledby="answer-list-heading">
+                    <div class="panel-heading">
+                        <h2 id="answer-list-heading">Risposte</h2>
+                        <span class="result-count" id="response-count" aria-live="polite"></span>
+                    </div>
+                    <div class="answer-list" id="response-list" role="listbox" aria-label="Risposte disponibili"></div>
+                </section>
+                <aside class="panel detail-panel" aria-labelledby="response-detail-heading">
+                    <div class="panel-heading detail-heading">
+                        <div>
+                            <h2 id="response-detail-heading">Risposta al cliente</h2>
+                            <span class="result-count" id="response-question"></span>
+                        </div>
+                        <div class="detail-navigation" aria-label="Naviga tra le risposte filtrate">
+                            <button class="button icon-only" id="response-prev" type="button" aria-label="Risposta precedente"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+                            <button class="button icon-only" id="response-next" type="button" aria-label="Risposta successiva"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+                        </div>
+                    </div>
+                    <div class="detail-body">
+                        <div class="review-alert" id="response-review-alert" hidden>
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 20h18.4z"/><path d="M12 9v5M12 17.5v.1"/></svg>
+                            <span id="response-review-text"></span>
+                        </div>
+                        <div class="response-preview" id="response-preview"></div>
+                        <textarea class="response-editor" id="response-editor" aria-label="Modifica la risposta prima di copiarla" hidden></textarea>
+                        <div class="detail-actions">
+                            <button class="button" id="edit-response" type="button">Modifica testo</button>
+                            <button class="button primary" id="copy-response" type="button">
+                                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="7" width="11" height="13" rx="1.5"/><path d="M16 7V4H5v13h3"/></svg>
+                                Copia risposta
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <section class="app-view" data-view="contacts" aria-labelledby="contacts-heading" hidden>
+            <div class="page-heading">
+                <h1 id="contacts-heading">Contatti esterni</h1>
+                <p>Trova il referente corretto e copia il messaggio per il cliente.</p>
+            </div>
+            <div class="toolbar">
+                <label class="search-control" for="contact-search">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+                    <span class="visually-hidden">Cerca nei contatti esterni</span>
+                    <input id="contact-search" type="search" placeholder="Cerca tema, località, azienda o referente" autocomplete="off">
+                    <kbd aria-hidden="true">/</kbd>
+                </label>
+                <button class="button" id="add-contact" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Aggiungi contatto</button>
+            </div>
+            <div class="filter-bar" id="contact-filters" aria-label="Filtra contatti per tema"></div>
+            <div class="workspace-grid">
+                <section class="panel" aria-labelledby="contact-list-heading">
+                    <div class="panel-heading">
+                        <h2 id="contact-list-heading">Contatti</h2>
+                        <span class="result-count" id="contact-count" aria-live="polite"></span>
+                    </div>
+                    <div class="contact-table-head" aria-hidden="true">
+                        <span>Quando usarlo</span><span>Azienda / ufficio</span><span>Referenti</span><span>Telefono</span>
+                    </div>
+                    <div class="contact-list" id="contact-list" role="listbox" aria-label="Contatti esterni disponibili"></div>
+                </section>
+                <aside class="panel detail-panel" aria-labelledby="contact-title">
+                    <div class="panel-heading detail-heading">
+                        <h2 id="contact-title">Messaggio per il cliente</h2>
+                        <button class="button" id="edit-contact" type="button">Modifica contatto</button>
+                    </div>
+                    <div class="detail-body">
+                        <div class="contact-meta" id="contact-meta"></div>
+                        <div class="contact-message" id="contact-message"></div>
+                        <div class="detail-actions">
+                            <button class="button primary" id="copy-contact" type="button">
+                                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="7" width="11" height="13" rx="1.5"/><path d="M16 7V4H5v13h3"/></svg>
+                                Copia messaggio
+                            </button>
+                            <button class="button" id="copy-phone" type="button">
+                                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.5 9 7.7 6.8 9.2a14 14 0 0 0 8 8l1.5-2.2 4.2 1.8v2.1a2 2 0 0 1-2 2A15.5 15.5 0 0 1 3.1 5.5a2 2 0 0 1 2-2h2.1Z"/></svg>
+                                Copia numero
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <dialog class="dialog" id="contact-editor">
+        <form class="dialog-form" id="contact-editor-form" method="dialog">
+            <div class="dialog-header">
+                <h2 id="contact-editor-title">Nuovo contatto</h2>
+                <button class="dialog-close" id="close-contact-editor" type="button" aria-label="Chiudi"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+            </div>
+            <div class="dialog-content">
+                <input type="hidden" name="id">
+                <div class="field full"><label for="contact-use-case">Quando usarlo</label><input id="contact-use-case" name="useCase" required placeholder="Es. Informazioni Scoppio o Sabato"></div>
+                <div class="field"><label for="contact-topics">Temi</label><input id="contact-topics" name="topics" placeholder="Scoppio, Sabato"><small>Separa più temi con una virgola.</small></div>
+                <div class="field"><label for="contact-phone-input">Telefono</label><input id="contact-phone-input" name="phone" inputmode="tel" required placeholder="080 000 0000"></div>
+                <div class="field"><label for="contact-office">Azienda / ufficio</label><input id="contact-office" name="office" required placeholder="Agenzia o azienda"></div>
+                <div class="field"><label for="contact-location">Località</label><input id="contact-location" name="location" placeholder="Comune o sede"></div>
+                <div class="field full"><label for="contact-people">Referenti</label><textarea id="contact-people" name="people" placeholder="Un referente per riga"></textarea></div>
+                <div class="field full"><label for="contact-keywords">Parole utili per la ricerca</label><input id="contact-keywords" name="keywords" placeholder="località, linea, vecchio nome, sinonimi"></div>
+                <div class="field full"><label for="contact-message-input">Messaggio per il cliente</label><textarea id="contact-message-input" name="message" rows="8" placeholder="Lascia vuoto per generare un messaggio standard."></textarea></div>
+            </div>
+            <div class="dialog-footer">
+                <button class="button danger" id="delete-contact" type="button" hidden>Elimina</button>
+                <span class="spacer"></span>
+                <button class="button" id="cancel-contact-editor" type="button">Annulla</button>
+                <button class="button primary" type="submit">Salva contatto</button>
+            </div>
+        </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="contatti.js?v=2"></script>
+    <script>
+        // ════════════════════════════════════════════
+        //  CATEGORY META  –  single source of truth
+        // ════════════════════════════════════════════
+        const CAT_META = {
+            redirect:     { icon: '⚠️',  label: 'Reindirizzamenti' },
+            biglietti:    { icon: '🎫',  label: 'Biglietti'    },
+            abbonamenti:  { icon: '🗓️',  label: 'Abbonamenti'  },
+            rimborsi:     { icon: '💰',  label: 'Rimborsi'     },
+            app:          { icon: '📱',  label: 'App'          },
+            bagagli:      { icon: '🧳',  label: 'Bagagli'      },
+            agevolazioni: { icon: '🎖️',  label: 'Agevolazioni' },
+            aeroporto:    { icon: '✈️',  label: 'Aeroporto'    },
+            viaggiatori:  { icon: '🧍',  label: 'Viaggiatori'  },
+            emergenze:    { icon: '🚨',  label: 'Emergenze'    },
+            reclami:      { icon: '📋',  label: 'Reclami'      }
+        };
+
+        // ════════════════════════════════════════════
+        //  RESPONSE DATA
+        // ════════════════════════════════════════════
+        const responses = {
+            cotrap: [
+                {
+                    category: "redirect",
+                    tag: "⚠️ REDIRECT",
+                    question: "Azienda sbagliata / Non è competenza nostra",
+                    desc: "COTRAP è un consorzio → reindirizzare al vettore specifico",
+                    keywords: "non competenza nostra voi siete cotrap o sita azienda sbagliata errore numero altra compagnia chi devo chiamare non siete voi bagaglio smarrito",
+                    text: `Gentile Cliente,
+
+La ringraziamo per averci contattato.
+
+COTRAP coordina oltre 60 aziende di trasporto in Puglia ma non gestisce direttamente i servizi operativi dei singoli vettori. La Sua richiesta deve essere inviata direttamente alla compagnia che ha effettuato il servizio.
+
+COME IDENTIFICARE L'AZIENDA:
+• Il nome del vettore è riportato sul Suo biglietto.
+• Se non ha il biglietto, effettui una ricerca su https://biglietteria.cotrap.it/:
+  1. Inserire il Comune/frazione di PARTENZA e il Comune/frazione di ARRIVO
+  2. Cliccare su "Fermata di partenza" e selezionare la fermata desiderata
+  3. Compariranno le corse disponibili con il NOME DELLA SOCIETÀ che svolge il servizio
+  4. Contattare direttamente l'azienda indicata specificando: Tratta, Data e Ora della corsa
+
+⚠️ COTRAP è esclusivamente un consorzio: la gestione operativa dei servizi è di competenza delle singole aziende consorziate.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "redirect",
+                    tag: "⚠️ REDIRECT",
+                    question: "Richiesta incompleta / Mancano informazioni essenziali",
+                    desc: "Chiedere dettagli mancanti e indicare come trovare l'azienda giusta",
+                    keywords: "ciao salve info problema aiuto buongiorno buonasera vorrei sapere richiesta generica senza dettagli domanda vuota chi gestisce quale azienda fa questa linea chi devo contattare per orari numero di telefono informazioni generiche",
+                    text: `Gentile Cliente,
+
+La ringraziamo per averci contattato.
+
+Per poterLa assistere abbiamo bisogno di sapere a quale azienda è diretta la Sua richiesta.
+
+COME TROVARE L'AZIENDA DA CONTATTARE:
+1. Effettui una ricerca su https://biglietteria.cotrap.it/
+2. Inserisca il Comune di PARTENZA e il Comune di ARRIVO
+3. Clicchi su "Fermata di partenza" e selezioni la fermata desiderata
+4. Compariranno le corse disponibili con il NOME DELLA SOCIETÀ che svolge il servizio
+5. Una volta individuata l'azienda, utilizzi la sezione CONTATTI del sito (MODULO SCELTA AZIENDA) per inviarle la Sua richiesta
+
+Ricordi di fornire sempre:
+• Tratta (Partenza → Arrivo)
+• Data e Ora della corsa
+• Dettaglio della richiesta
+
+⚠️ COTRAP è esclusivamente un consorzio: la gestione operativa dei servizi è di competenza delle singole aziende consorziate.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "biglietti",
+                    tag: "🎫 BIGLIETTI",
+                    question: "Orari, come prenotare, dove acquistare biglietti",
+                    desc: "Sito biglietteria.cotrap.it, App COTRAP, biglietterie fisiche, acquisto a bordo",
+                    keywords: "orari biglietti comprare biglietto acquistare titolo di viaggio dove si compra biglietteria fisica app cotrap sito web punti vendita tabaccaio bar prenotare corsa fermate mappa come si prenota come trovo gli orari biglietto corsa semplice solo andata viaggio singolo ticket one way acquistare corsa singola",
+                    text: `Gentile Cliente,
+
+Può consultare orari aggiornati e acquistare biglietti attraverso i seguenti canali:
+
+ONLINE (CONSIGLIATO):
+• Sito web: https://biglietteria.cotrap.it/
+• App COTRAP (disponibile su Google Play e App Store)
+
+ALTRI CANALI:
+• Biglietterie autorizzate sul territorio
+• A bordo del mezzo (non sempre garantito – vedi nota)
+
+COME EFFETTUARE LA RICERCA E PRENOTARE:
+1. Selezionare "LINEA EXTRAURBANA" o "LINEA URBANA"
+2. Inserire il Comune di partenza e il Comune di destinazione
+3. Cliccare su "Fermata di partenza": digitare il nome della fermata oppure scegliere "Seleziona dalla mappa" per individuarla visivamente su Google Maps
+4. Fare lo stesso per la "Fermata di arrivo"
+5. Selezionare la data del viaggio e cliccare su "Cerca corsa"
+6. Scegliere la corsa desiderata e cliccare su "Aggiungi"
+7. Procedere al Carrello e cliccare su "Paga ora" per completare l'acquisto
+
+Il sistema mostrerà solo le corse valide per la data selezionata.
+Nota: se le corse del giorno sono già partite, selezionare il giorno successivo per vedere l'elenco completo.
+
+📹 Video guida passo-passo: https://www.youtube.com/watch?v=TuPAtOghZ4o
+
+⚠️ ACQUISTO A BORDO: non sempre garantito e comporta un sovrapprezzo di € 1,50. Si consiglia di acquistare online prima della partenza.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "biglietti",
+                    tag: "🎫 BIGLIETTI",
+                    question: "Problemi con il sito / Non riesco ad acquistare online",
+                    desc: "Video guida + suggerimenti tecnici per la prenotazione",
+                    keywords: "sito bloccato non carica pagina errore pagamento transazione fallita impossibile prenotare bug carrello vuoto non funziona il sito",
+                    text: `Gentile Cliente,
+
+La informiamo che il nostro sistema di biglietteria online è regolarmente funzionante.
+
+Se riscontra difficoltà durante la procedura di acquisto, La invitiamo a seguire la nostra video guida:
+
+📹 Video guida: https://www.youtube.com/watch?v=TuPAtOghZ4o
+
+SUGGERIMENTI TECNICI:
+• Utilizzare un browser aggiornato (Chrome, Firefox, Edge)
+• Verificare che i popup non siano bloccati
+• Controllare la connessione internet
+• Provare a svuotare la cache del browser
+
+Per ulteriore assistenza: (+39) 080-5790111.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "biglietti",
+                    tag: "🎫 BIGLIETTI",
+                    question: "Ho prenotato una corsa, è valida? Esiste davvero?",
+                    desc: "Conferma validità prenotazione effettuata sul sito",
+                    keywords: "conferma prenotazione è valido il biglietto esiste questa corsa sono sicuro di partire dubbi validità biglietto arrivato",
+                    text: `Gentile Cliente,
+
+La ringraziamo per averci contattato.
+
+Le confermiamo che tutte le corse disponibili sul nostro portale https://biglietteria.cotrap.it/ sono regolarmente attive e operative.
+
+Se ha completato l'acquisto e ricevuto il biglietto via email, la Sua prenotazione è confermata e valida.
+
+Il nostro sistema mostra esclusivamente corse effettivamente in servizio: se una corsa è acquistabile, è attiva e garantita per la data selezionata.
+
+Per qualsiasi necessità: (+39) 080-5790111.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "abbonamenti",
+                    tag: "🗓️ ABBONAMENTI",
+                    question: "Come fare l'abbonamento? Procedura acquisto",
+                    desc: "Guida acquisto abbonamenti online (sito/app) o in agenzia – disponibilità variabile per vettore",
+                    keywords: "fare abbonamento mensile settimanale tessera pendolare procedura abbonamento studenti lavoratori rinnovo tessera scaduta cotrap sita online agenzia",
+                    text: `Gentile Cliente,
+
+Ecco la procedura per acquistare un abbonamento.
+
+DOVE ACQUISTARE:
+• Online su https://biglietteria.cotrap.it/ o tramite App COTRAP
+• Presso le agenzie convenzionate sul territorio
+
+⚠️ DISPONIBILITÀ ONLINE VARIABILE PER VETTORE:
+Gli abbonamenti online sono disponibili solo per i vettori che hanno già attivato questo servizio sul portale. Non tutti i vettori lo hanno ancora abilitato.
+Per verificare se il proprio vettore è disponibile: selezionare l'azienda direttamente sul portale o sull'App — se compare nell'elenco, l'acquisto online è possibile; in caso contrario rivolgersi all'agenzia convenzionata.
+
+PROCEDURA ONLINE:
+
+1. ACCESSO AL SITO O APP:
+• Andare su https://biglietteria.cotrap.it/ o aprire l'App COTRAP
+• Cliccare su "ABBONAMENTO" poi "vai al servizio"
+• Effettuare il login
+
+2. RICERCA:
+• Selezionare "ABBONAMENTI EXTRAURBANI" o "ABBONAMENTI URBANI"
+• Compilare: Azienda, Comune di partenza, Comune di arrivo, Tipo abbonamento, Periodo
+• Cliccare su "Cerca abbonamenti"
+
+3. ACQUISTO:
+• Cliccare su "Aggiungi" nella riga dell'abbonamento desiderato
+• Andare al "Carrello" e verificare i dati
+
+4. PAGAMENTO:
+• Inserire/verificare Numero Tessera e Codice Fiscale
+• Cliccare su "Paga ora" e completare il pagamento
+
+Al termine riceverà una email di conferma e potrà scaricare il titolo.
+
+NOTE IMPORTANTI:
+• L'abbonamento vale solo per il periodo selezionato.
+• Le corse vanno scalate validando il QR code a bordo.
+• Esaurite le corse, è necessario acquistare un nuovo titolo.
+• Per la tessera MY CARD: vedere la scheda dedicata "MY CARD: cos'è, come richiederla".
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "abbonamenti",
+                    tag: "🗓️ ABBONAMENTI",
+                    question: "Abbonamento dall'App: tesserino dimenticato, smarrito o sbiadito",
+                    desc: "L'abbonamento è sempre nell'App COTRAP: si convalida con il QR code all'obliteratrice",
+                    keywords: "visualizzare abbonamento app vedere abbonamento cellulare telefono tesserino dimenticato tessera dimenticata smarrito perso sbiadito si schiarisce rovinato mostrare abbonamento obliteratrice convalidare qr code abbonamento settimanale mensile",
+                    text: `Gentile Cliente,
+
+La ringraziamo per averci contattato.
+
+L'abbonamento acquistato è sempre disponibile nell'App COTRAP e può essere utilizzato direttamente dal cellulare, anche in caso di dimenticanza, smarrimento o deterioramento del tesserino.
+
+COME UTILIZZARE L'ABBONAMENTO DALL'APP:
+1. Aprire l'App COTRAP
+2. Accedere alla sezione "I miei acquisti"
+3. Selezionare l'abbonamento: comparirà il QR code
+4. A ogni salita a bordo, avvicinare il QR code al lettore ottico in basso dell'obliteratrice
+
+Quando la schermata dell'obliteratrice diventa verde, la corsa è convalidata.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "biglietti",
+                    tag: "🎫 BIGLIETTI",
+                    question: "Ristampa biglietto / Non trovo il biglietto / Email persa",
+                    desc: "Come recuperare biglietti già acquistati tramite sito o App",
+                    keywords: "perso email biglietto non trovo il pdf ristampare biglietto recuperare titolo viaggio cancellato per errore scaricare di nuovo",
+                    text: `Gentile Cliente,
+
+Per ristampare i Suoi biglietti:
+
+TRAMITE SITO O APP (CONSIGLIATO):
+1. Accedere a https://biglietteria.cotrap.it/ o all'App COTRAP
+2. Effettuare il login con la stessa email utilizzata per l'acquisto
+3. Accedere alla sezione "I miei acquisti"
+4. Selezionare il biglietto e stampare o salvare il PDF
+
+SE NON HA UN ACCOUNT:
+Registrarsi con la stessa email dell'acquisto. I biglietti precedenti saranno automaticamente associati al nuovo profilo.
+
+⚠️ NOTA PER UTENTI GMAIL:
+In presenza di più email con biglietti, Gmail potrebbe aprire una versione precedente. Si consiglia di:
+• Cercare manualmente l'email più recente
+• Eliminare le email di biglietti già utilizzati
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "rimborsi",
+                    tag: "💰 RIMBORSI",
+                    question: "Rimborso SITA Puglia: quando spetta e come richiederlo",
+                    desc: "Il biglietto non usato non è rimborsabile; rimborso previsto per cancellazioni o ritardi rilevanti",
+                    keywords: "rimborso sita puglia modulo rimborso cancellazione ritardo 60 minuti 30 minuti biglietto non utilizzato",
+                    text: `Gentile Cliente,
+
+per i servizi SITA Puglia, il biglietto non utilizzato non è rimborsabile.
+
+È invece previsto il rimborso del prezzo del biglietto quando il servizio viene cancellato oppure subisce un ritardo superiore a:
+• 60 minuti per i servizi regionali o locali
+• 30 minuti per i servizi urbani
+
+Sono esclusi i casi dovuti a calamità naturali, scioperi o altre emergenze imprevedibili. Per gli abbonamenti, il rimborso previsto è pari alla quota giornaliera.
+
+COME RICHIEDERLO:
+La richiesta può essere presentata durante o subito dopo il servizio, esibendo il titolo di viaggio e compilando la modulistica prevista dal vettore.
+
+Per assistenza:
+• Email: info.puglia@sitasudtrasporti.it
+• Telefono: 080 5790111
+
+Condizioni aggiornate: https://sitasudtrasporti.it/puglia/condizioni-generali
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "viaggiatori",
+                    tag: "🐾 VIAGGIATORI",
+                    question: "Posso portare cane / gatto / animale a bordo?",
+                    desc: "Pugliairbus: animali fino a 3 kg in trasportino 50×35×50 cm; cani guida gratuiti",
+                    keywords: "cane gatto trasportino animale a bordo taglia piccola museruola regole animali viaggiare con cane",
+                    text: `Gentile Cliente,
+
+Le comunichiamo le condizioni previste sul collegamento COTRAP Pugliairbus per il trasporto di animali.
+
+ANIMALI AMMESSI:
+
+1. ANIMALI DI PICCOLA TAGLIA:
+   • Peso massimo dell'animale: 3 kg
+   • Trasportino chiuso obbligatorio, dimensioni massime 50 × 35 × 50 cm
+   • Il trasportino non può occupare un posto a sedere
+   • Tariffa: pari al biglietto intero
+
+2. CANI GUIDA PER NON VEDENTI:
+   • Viaggiano gratuitamente
+
+REGOLE:
+• Il passeggero è responsabile dell'animale per tutto il viaggio
+• Eventuali danni causati dall'animale sono a carico del passeggero
+• Il mancato rispetto delle regole può comportare l'interruzione del viaggio
+
+Per servizi svolti da altri vettori, La invitiamo a verificare le condizioni della compagnia indicata sul biglietto.
+
+Condizioni Pugliairbus in vigore dal 1° aprile 2026:
+https://www.cotrap.it/wp-content/uploads/2026/04/Condizioni_di_trasportoTPL-Pugliairbus2026_5.0_01-aprile-2026.pdf
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "viaggiatori",
+                    tag: "👶 VIAGGIATORI",
+                    question: "I bambini pagano? Passeggino a bordo?",
+                    desc: "Gratis sotto 10 anni se accompagnati e non occupano posto; passeggino chiuso gratuito",
+                    keywords: "bambino paga neonato passeggino a bordo figli minori gratis fino a che età riduzione bambini",
+                    text: `Gentile Cliente,
+
+Le comunichiamo le condizioni per il trasporto di minori.
+
+BAMBINI SOTTO I 10 ANNI:
+• Viaggiano gratuitamente se accompagnati da un adulto
+• Non devono occupare un posto a sedere
+• Un adulto può trasportare gratuitamente un solo bambino sotto i 10 anni
+
+PASSEGGINI:
+• Trasporto gratuito di un passeggino per bambino
+• Il passeggino deve essere chiuso
+• Non deve intralciare il deflusso dei passeggeri
+
+Condizioni complete: https://www.cotrap.it/pagina/condizionidiviaggio
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "agevolazioni",
+                    tag: "🎖 AGEVOLAZIONI",
+                    question: "Invalidità: requisiti, tessera e procedura acquisto biglietto gratuito",
+                    desc: "Procedura completa: richiesta tessera MY CARD + associazione + acquisto biglietto gratuito (3 fasi)",
+                    keywords: "invalidità 104 legge 104 disabili tessera gratuita invalidi civili accompagnatore disabile procedura mycard invalidi",
+                    text: `Gentile Cliente,
+
+Le tessere per persone con disabilità si richiedono online tramite il portale MY CARD.
+
+CHI HA DIRITTO ALLA GRATUITÀ (ART. 30 C. 3 L.R. 18/2002):
+• Persone prive di vista (cecità assoluta o residuo visivo inferiore o uguale a 1/10)
+• Invalidi civili con percentuale di invalidità pari o superiore all'80%
+• Invalidi del lavoro con percentuale pari o superiore al 70%
+• Invalidi di guerra, civili di guerra e per servizio (cat. 1-3 tabella A, L. 113/1968)
+
+TIPI DI TESSERA:
+1. Persona con disabilità + accompagnatore (corse singole)
+2. Persona con disabilità senza accompagnatore (corse singole)
+3. Persona con disabilità + accompagnatore (abbonamenti)
+4. Persona con disabilità senza accompagnatore (abbonamenti)
+
+DOCUMENTI RICHIESTI:
+• Verbale della Commissione Medica con percentuale di invalidità e riferimento alla L.R. 18/2002
+• Documento d'identità valido
+• Foto tessera a colori
+• Attestato di frequenza scolastica/lavorativa (solo per abbonamenti)
+
+⚠️ La Disability Card INPS NON è accettata. Serve il Verbale della Commissione Medica.
+
+═══════════════════════════════════════
+PROCEDURA IN 3 FASI
+═══════════════════════════════════════
+
+FASE 1 - RICHIESTA TESSERA MY CARD:
+1. Accedere a https://mycard.cotrap.eu/ e registrarsi
+2. Cliccare su "Nuova Richiesta" e selezionare il vettore
+3. Selezionare il tipo di tessera e caricare i documenti
+4. Attendere approvazione e ricezione del Codice Tessera via email
+
+📹 Video guida: https://www.youtube.com/watch?v=nW-VOQk8jTc
+📄 Info: https://www.cotrap.it/tessere-per-invalidita/
+
+FASE 2 - ASSOCIAZIONE TESSERA AL PROFILO DI ACQUISTO:
+⚠️ Passaggio obbligatorio: i due sistemi non comunicano automaticamente.
+
+1. Login su https://biglietteria.cotrap.it/ o App COTRAP
+2. Andare su "Il mio profilo" → "Dati Utente"
+3. Aprire "Gestione Tessere e Agevolazioni"
+4. Inserire il Codice Tessera e il Codice Fiscale
+5. Confermare e salvare
+
+Senza questo passaggio il sistema non applica l'agevolazione.
+
+FASE 3 - ACQUISTO DEL BIGLIETTO GRATUITO:
+1. Selezionare tratta e data
+2. Cliccare su "Fermata di partenza": digitare il nome oppure scegliere "Seleziona dalla mappa" per individuarla su Google Maps
+3. Selezionare la corsa desiderata
+4. Il sistema applica automaticamente lo storno (Totale: € 0,00)
+5. Completare la transazione per generare il QR Code da mostrare a bordo
+
+⚠️ Gli autisti NON possono emettere titoli gratuiti o agevolati. Serve il QR Code generato online.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "agevolazioni",
+                    tag: "🎖 AGEVOLAZIONI",
+                    question: "Documenti errati / Foto sbagliata / Percentuale insufficiente tessera invalidità",
+                    desc: "Problemi con richiesta tessera invalidità: cosa correggere e come",
+                    keywords: "documento rifiutato foto non valida tessera respinta errore dati anagrafici percentuale non valida correzione pratica invalidi",
+                    text: `Gentile Cliente,
+
+La Sua richiesta di tessera non può essere elaborata per documentazione incompleta o non conforme.
+
+DOCUMENTO INVALIDITÀ:
+• Serve il CERTIFICATO DI INVALIDITÀ con la PERCENTUALE chiaramente indicata
+• La Disability Card (INPS) NON è accettata
+• Percentuale minima: invalidi civili 80%, invalidi del lavoro 70%
+
+FOTO:
+• Formato fototessera (frontale, sfondo chiaro)
+• A colori, volto ben visibile e riconoscibile
+• Recente
+
+COME CORREGGERE:
+1. Accedere a https://mycard.cotrap.eu/
+2. Entrare nella propria area personale
+3. Caricare il documento/foto corretto
+
+Per assistenza (Telefono+WhatsApp): 328 803 2801 – Lun-Ven 9:00-13:00 (esclusi festivi)
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "abbonamenti",
+                    tag: "🗓️ ABBONAMENTI",
+                    question: "MY CARD: cos'è, come richiederla, problemi e assistenza",
+                    desc: "Tessera elettronica per abbonamenti: procedura richiesta e contatti assistenza",
+                    keywords: "cos'è mycard costo tessera 10 euro come richiedere mycard supporto tecnico mycard problemi registrazione mycard",
+                    text: `Gentile Cliente,
+
+MY CARD è la tessera elettronica per l'acquisto di abbonamenti settimanali e mensili sulle aziende consorziate COTRAP.
+
+COME RICHIEDERE LA TESSERA:
+1. Accedere a https://mycard.cotrap.eu/ e registrarsi
+2. Selezionare il vettore di riferimento
+3. Compilare i dati e caricare documento d'identità e foto
+4. Pagare € 10,00 (carta di credito o codice acquisto)
+5. Ricevere la ricevuta provvisoria via email (stamparla e conservarla)
+6. Ricevere la tessera fisica al domicilio
+
+⚠️ La ricevuta provvisoria vale come tessera fino alla ricezione di quella fisica.
+
+ASSISTENZA MY CARD:
+
+1. ONLINE (PIÙ RAPIDO):
+   https://assistenza.tecbus.eu/submit_ticket/next/tessere-elettroniche#navbar
+
+2. EMAIL: assistenza@mycard.cotrap.eu
+
+3. TELEFONO+WHATSAPP: 328 803 2801 – Lun-Ven 9:00-13:00 (esclusi festivi)
+
+Info complete: https://www.cotrap.it/my-card/
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "agevolazioni",
+                    tag: "🎖 AGEVOLAZIONI",
+                    question: "Bonus 50% studenti pendolari (Regione Puglia)",
+                    desc: "Misura 2025–2026 conclusa: verificare l'eventuale rinnovo sulla pagina ufficiale",
+                    keywords: "bonus studenti sconto 50% regione puglia agevolazione studenti pendolari voucher studio",
+                    reviewNote: "La misura indicata è terminata il 31 maggio 2026. Verificare la pubblicazione di un nuovo bando prima di inviare la risposta.",
+                    text: `Gentile Cliente,
+
+la precedente Agevolazione Tariffaria 50% per studenti pendolari, prevista dalla DGR n. 746 del 05/06/2025, era valida dal 1° ottobre 2025 al 31 maggio 2026 e risulta conclusa.
+
+Per verificare l'eventuale pubblicazione di una nuova misura per l'anno scolastico successivo, La invitiamo a consultare la pagina ufficiale:
+https://www.cotrap.it/abbonamento_studenti
+
+La gestione dei requisiti, dei voucher e delle anagrafiche è di competenza della Regione Puglia.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "aeroporto",
+                    tag: "✈️ AEROPORTO",
+                    question: "Aeroporto Bari: dove sono i bus / volo in ritardo",
+                    desc: "Ubicazione zona Arrivi + i bus NON aspettano voli in ritardo",
+                    keywords: "aeroporto bari dove si prende bus attesa volo ritardo aereo pugliaairbus fermata aeroporto",
+                    text: `Gentile Cliente,
+
+UBICAZIONE BUS:
+I mezzi PugliaAirbus si trovano nell'area di sosta antistante l'uscita principale dell'aeroporto, zona ARRIVI.
+
+⚠️ VOLI IN RITARDO:
+Per garantire la puntualità a tutti i passeggeri, gli autobus partono tassativamente all'orario indicato sul biglietto. Non è previsto il coordinamento con i voli in arrivo: i nostri mezzi NON possono attendere voli in ritardo.
+
+SI CONSIGLIA DI:
+• Verificare l'orario di partenza del bus al momento della prenotazione
+• Prevedere un margine sufficiente tra atterraggio previsto e partenza bus
+• In caso di ritardo significativo, valutare l'acquisto di un biglietto per la corsa successiva
+
+Orari disponibili: https://biglietteria.cotrap.it/
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "aeroporto",
+                    tag: "✈️ AEROPORTO",
+                    question: "Orari aeroportuali non ancora disponibili / quando vengono pubblicati?",
+                    desc: "Gli orari dipendono dalle società aeroportuali, non da COTRAP",
+                    keywords: "orari aeroporto estate inverno quando escono orari aeroportuali aggiornamento orari pugliaairbus",
+                    text: `Gentile Cliente,
+
+Gli orari dei collegamenti aeroportuali sono soggetti a variazioni stagionali e vengono aggiornati periodicamente.
+
+I quadri orari vengono definiti dalle società di gestione aeroportuale della Puglia. La pubblicazione non dipende da COTRAP e non siamo in grado di anticiparne la data.
+
+Non appena disponibili, verranno pubblicati su:
+• https://www.cotrap.it/
+• https://biglietteria.cotrap.it/
+
+Le consigliamo di monitorare periodicamente questi canali.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "emergenze",
+                    tag: "🚨 EMERGENZE",
+                    question: "Sciopero: quali corse sono garantite?",
+                    desc: "Fasce orarie garantite (servizio minimo L. 146/90) e link avvisi",
+                    keywords: "sciopero oggi corse garantite sciopero orari garantiti agitazione sindacale bus soppressi sciopero",
+                    text: `Gentile Cliente,
+
+La informiamo che è stato proclamato uno sciopero che potrebbe interessare i nostri servizi.
+
+DETTAGLI SCIOPERO:
+[⚠️ MODIFICARE: Inserire data, durata, sindacato promotore]
+
+FASCE ORARIE GARANTITE (SERVIZIO MINIMO - L. 146/90):
+• Dall'inizio del servizio alle ore 8:29
+
+• SITA – Gruppo di Bari / COTRAP: dalle ore 12:00 alle ore 14:29
+• SITA – Gruppo di Foggia:        dalle ore 12:30 alle ore 14:29
+
+Al di fuori di queste fasce la regolarità non può essere garantita.
+
+Aggiornamenti in tempo reale: https://www.cotrap.it/avvisi
+
+Ci scusiamo per gli eventuali disagi.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "app",
+                    tag: "📱 APP",
+                    question: "Problemi con l'App COTRAP",
+                    desc: "Richiesta informazioni specifiche per diagnosticare il problema segnalato",
+                    keywords: "problema app cotrap app non funziona app bloccata errore app cotrap bug app crash app aggiornamento app non carica app lenta",
+                    text: `Gentile Cliente,
+
+La ringraziamo per averci contattato.
+
+Per poterLa assistere nel migliore dei modi abbiamo bisogno di alcune informazioni specifiche, in quanto la segnalazione risulta troppo generica per individuare la causa del problema.
+
+CI OCCORRE SAPERE:
+
+1. DISPOSITIVO E SISTEMA OPERATIVO:
+   • Utilizza Android o iOS (iPhone)?
+   • Quale versione del sistema operativo? (es. Android 13, iOS 17)
+
+2. VERSIONE DELL'APP:
+   • Quale versione dell'App COTRAP sta utilizzando? È aggiornata all'ultima versione disponibile?
+   • Per verificare la versione: aprire l'App → toccare il menu in basso → in basso a destra comparirà il numero di versione (es. v.2.9.6 b.91)
+
+3. OPERAZIONI ESEGUITE:
+   • Quali passaggi ha effettuato prima che si verificasse il problema? (descrivere in ordine le azioni compiute)
+
+4. DATA E BIGLIETTO:
+   • In quale data ha riscontrato il problema?
+   • Quale biglietto stava cercando di acquistare? (tratta, data di viaggio)
+
+5. STATO DI ACCESSO:
+   • Era loggato sull'App con il Suo account al momento del problema?
+
+Grazie per la collaborazione. Non appena riceveremo le informazioni richieste provvederemo ad assisterLa tempestivamente.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "app",
+                    tag: "📱 APP",
+                    question: "Non riesco a fare screenshot del biglietto sull'App",
+                    desc: "Blocco screenshot intenzionale: misura anti-clonazione. Per condividere il biglietto girare l'email con il PDF allegato",
+                    keywords: "screenshot bloccato app non posso fare schermata biglietto non si fotografa blocco cattura schermo condividere biglietto figlio altra persona trasferire ticket clonazione pirateria",
+                    text: `Gentile Cliente,
+
+La ringraziamo per la segnalazione.
+
+Il blocco degli screenshot sull'App è una misura di sicurezza intenzionale, introdotta per prevenire la clonazione e la contraffazione dei biglietti digitali (anti-piracy). Non si tratta di un malfunzionamento.
+
+COME CONDIVIDERE IL BIGLIETTO CON UN'ALTRA PERSONA:
+
+SOLUZIONE 1 – INOLTRARE L'EMAIL:
+1. Aprire la casella email con cui è stato effettuato l'acquisto
+2. Cercare l'email di conferma dell'ordine (mittente biglietteria.cotrap.it)
+3. Inoltrare l'email direttamente al destinatario (figlio, familiare, ecc.)
+4. Il destinatario aprirà il PDF allegato e mostrerà il QR code al personale di bordo
+
+SOLUZIONE 2 – ACCESSO CONDIVISO ALL'ACCOUNT:
+Chi deve utilizzare il biglietto può accedere con le stesse credenziali (email e password) dell'account con cui è stato effettuato l'acquisto, sia da App che da sito https://biglietteria.cotrap.it/
+Troverà tutti i biglietti acquistati nella sezione "I miei acquisti".
+
+SOLUZIONE 3 – ACQUISTO CON DATI DEL VIAGGIATORE:
+In fase di acquisto è possibile inserire i dati (tessera o email) della persona che utilizzerà il biglietto. In questo modo il biglietto arriverà direttamente nella casella email del viaggiatore, senza necessità di condivisione.
+
+⚠️ Il QR code è univoco: ogni biglietto può essere validato una sola volta. Non è possibile duplicarlo o clonarlo.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "app",
+                    tag: "📱 APP",
+                    question: "Cliccando su 'Cambia Password' vengo reindirizzato alla pagina iniziale senza poter modificare la password",
+                    desc: "Problema di blocco pop-up del browser/sistema. Soluzioni: sbloccare i pop-up, provare browser o dispositivo diverso",
+                    keywords: "cambia password reindirizzamento redirect pagina iniziale modifica password non funziona cambio password bloccato popup pop-up browser",
+                    text: `Gentile Cliente,
+
+La ringraziamo per la segnalazione.
+
+Il problema descritto è molto probabilmente causato dal blocco dei pop-up nel Suo browser o dispositivo. Quando clicca su "Cambia Password", il sistema tenta di aprire una nuova pagina per la modifica, ma il blocco pop-up impedisce l'apertura e La reindirizza alla pagina iniziale.
+
+SOLUZIONI CONSIGLIATE:
+
+1. SBLOCCARE I POP-UP NEL BROWSER:
+   • Google Chrome: cliccare sull'icona a sinistra della barra dell'indirizzo (URL) del sito → selezionare "Pop-up e reindirizzamenti" → impostare su "Consenti"
+   • Safari: Impostazioni → Siti web → Finestre a comparsa → Consenti per il sito in questione
+   • Firefox: Impostazioni → Privacy e sicurezza → Permessi → Finestre pop-up → aggiungere il sito come eccezione
+
+2. PROVARE UN BROWSER DIVERSO:
+   Se il problema persiste, provare ad accedere da un altro browser (es. Chrome, Firefox, Edge, Safari).
+
+3. PROVARE DA UN DISPOSITIVO DIVERSO:
+   Se si riscontra il problema dall'App COTRAP, provare ad effettuare la modifica della password da un PC tramite il sito https://biglietteria.cotrap.it/, o viceversa.
+
+4. SVUOTARE LA CACHE DEL BROWSER:
+   In alcuni casi, svuotare la cache e i cookie del browser può risolvere il problema.
+
+Se dopo aver provato tutte le soluzioni il problema dovesse persistere, La preghiamo di contattarci nuovamente specificando il dispositivo e il browser utilizzati.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "bagagli",
+                    tag: "🧳 BAGAGLI",
+                    question: "Quanto bagaglio posso portare?",
+                    desc: "1 bagaglio gratuito (95cm, 10kg) + eventuale secondo bagaglio a tariffa",
+                    keywords: "bagaglio extra valigia grande due valigie peso bagaglio stiva bicicletta a bordo",
+                    text: `Gentile Cliente,
+
+BAGAGLIO GRATUITO:
+Ogni passeggero ha diritto a trasportare gratuitamente:
+• 1 collo personale (borsa, borsello o valigetta)
+• 1 bagaglio max 95 cm (lunghezza + altezza + profondità) e max 10 kg
+
+Il bagaglio va custodito sotto propria responsabilità, senza ingombrare il corridoio.
+
+SECONDO BAGAGLIO:
+Possibile (stesse dimensioni max) compatibilmente con la capienza del vano bagagliaio, a tariffa di corsa semplice (1a classe chilometrica).
+
+⚠️ OGGETTI VIETATI:
+• Bombole di gas (compressi, disciolti, liquefatti)
+• Materie esplosive, infiammabili, corrosive o pericolose
+• Materiali fragili (vasi, telecamere, ecc.)
+• Oggetti preziosi
+• Recipienti di vino e olio
+
+Tutti i bagagli devono essere ermeticamente chiusi.
+
+NOTA: I bambini sotto i 10 anni trasportati gratuitamente non beneficiano della franchigia bagagli.
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "reclami",
+                    tag: "📋 RECLAMI",
+                    question: "Oggetti smarriti: come recuperarli",
+                    desc: "Identificare prima il vettore e contattarlo. L'azienda organizzerà il recupero.",
+                    keywords: "ho perso qualcosa oggetto smarrito generico dimenticato a bordo non so quale bus ufficio oggetti smarriti dove ritirare oggetto recupero oggetti deposito smarriti",
+                    text: `Gentile Cliente,
+
+La ringraziamo per averci contattato in merito allo smarrimento o al recupero dell'oggetto.
+
+Ogni azienda gestisce autonomamente il ritrovamento e la restituzione degli oggetti sui propri mezzi. Pertanto, è necessario prima identificare il vettore con cui ha viaggiato e poi contattarlo direttamente. Saranno loro ad organizzarsi con Lei per concordare il modo migliore e il luogo più comodo per la restituzione in base a dove si trova l'oggetto.
+
+COME IDENTIFICARE L'AZIENDA DA CONTATTARE:
+• Il nome del vettore è riportato sul Suo biglietto.
+• Se non ha il biglietto, effettui una ricerca su https://biglietteria.cotrap.it/:
+  1. Inserisca il Comune di PARTENZA e il Comune di ARRIVO
+  2. Clicchi su "Fermata di partenza" e selezioni la fermata desiderata
+  3. Compariranno le corse disponibili con il NOME DELLA SOCIETÀ che svolge il servizio
+
+Una volta identificata l'azienda, utilizzi i loro contatti diretti per fare la richiesta di recupero.
+Ricordi di specificare:
+• Tratta, Data e Ora della corsa
+• Descrizione dettagliata dell'oggetto
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "abbonamenti",
+                    tag: "🗓️ ABBONAMENTI",
+                    question: "Tessera MY CARD smarrita / Richiesta duplicato",
+                    desc: "Duplicato tessera €10 tramite mycard.cotrap.eu – consegna postale",
+                    keywords: "duplicato tessera smarrita mycard duplicato costo duplicato tessera rubata rifare tessera",
+                    text: `Gentile Cliente,
+
+In caso di smarrimento o furto della tessera MY CARD, può richiedere un duplicato.
+
+PROCEDURA:
+1. Accedere a https://mycard.cotrap.eu/
+2. Entrare nella propria area personale
+3. Selezionare "Richiesta duplicato tessera"
+4. Completare la procedura online
+
+COSTO: € 10,00
+
+CONSEGNA: per posta al domicilio dichiarato durante la registrazione.
+
+⚠️ Fino alla ricezione del duplicato, si consiglia di non acquistare nuovi abbonamenti per evitare disagi ai controlli.
+
+Per assistenza:
+• Telefono+WhatsApp: 328 803 2801 – Lun-Ven 9:00-13:00 (esclusi festivi)
+• Online: https://assistenza.tecbus.eu/submit_ticket/next/tessere-elettroniche#navbar
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "abbonamenti",
+                    tag: "🗓️ ABBONAMENTI",
+                    question: "Ho fatto la MY CARD ma non mi arriva / Ritardo consegna tessera",
+                    desc: "La tessera ha tempi tecnici di mesi. Spiegazione validità tessera provvisoria e contatti assistenza",
+                    keywords: "tessera non arriva my card non è arrivata ritardo consegna tessera spedizione tempi attesa tessera provvisoria non ho ricevuto la tessera dopo mesi",
+                    text: `Gentile Cliente,
+
+La informiamo che la tessera MY CARD ha tempi tecnici per essere stampata e inviata a casa; pertanto, possono passare anche mesi prima dell'effettiva consegna.
+
+PROPRIO PER OVVIARE A QUESTO PROBLEMA:
+Le è stata fornita una TESSERA PROVVISORIA (inviata via email al momento del pagamento), che è possibile stampare o salvare sul telefono.
+Questa tessera provvisoria ha una scadenza prolungata di diversi mesi ed è perfettamente valida e sufficiente per l'acquisto e l'utilizzo degli abbonamenti, in attesa di quella definitiva.
+
+ASSISTENZA SPEDIZIONI:
+Se è già trascorso almeno un mese dalla richiesta e desidera avere informazioni precise sullo stato della spedizione, La invitiamo a contattare direttamente l'azienda che si occupa della gestione e spedizione delle tessere.
+
+CANALI UFFICIALI ASSISTENZA MY CARD:
+
+1. ONLINE (PIÙ RAPIDO):
+   https://assistenza.tecbus.eu/submit_ticket/next/tessere-elettroniche#navbar
+
+2. EMAIL: assistenza@mycard.cotrap.eu
+
+3. TELEFONO+WHATSAPP: 328 803 2801 – Lun-Ven 9:00-13:00 (esclusi festivi)
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "reclami",
+                    tag: "📞 RECLAMI",
+                    question: "Reclamo formale COTRAP/SITA: come presentarlo",
+                    desc: "Procedura reclami SITA/COTRAP (prima istanza) + ART (seconda istanza)",
+                    keywords: "reclamo formale pec sita autorità trasporti denuncia legale ricorso indennizzo ritardo reclamo generico autista maleducato bus sporco ritardo bus segnalazione disservizio",
+                    text: `Gentile Cliente,
+
+Le illustriamo come presentare un reclamo formale.
+
+⚠️ Procedura valida esclusivamente per COTRAP e SITA Sud Trasporti. Per disservizi di altra azienda, contattare il vettore indicato sul biglietto.
+
+PRIMA ISTANZA – COTRAP / SITA:
+Entro 3 mesi dalla data del servizio, tramite:
+• Email SITA: reclami@sitasudtrasporti.it
+• Sito SITA: www.sitasudtrasporti.it (sezione "Reclami")
+• Posta: SITA Sud Trasporti Srl – Via Bruno Buozzi, 36 – 70132 Bari
+• Email COTRAP: reclami@cotrap.it
+• Sito COTRAP: www.cotrap.it (sezione Reclami)
+
+COSA INCLUDERE:
+• Dati personali (nome, cognome, recapito)
+• Data, ora, partenza e destinazione del viaggio
+• Copia del biglietto o codice di prenotazione
+• Descrizione del problema
+
+TEMPI DI RISPOSTA:
+• Entro 1 mese: conferma ricezione e avvio verifica
+• Entro 3 mesi: riscontro definitivo
+
+INDENNIZZO AUTOMATICO SE NON RISPONDE NEI TEMPI:
+• 10% del biglietto se risposta tra 91° e 121° giorno
+• 20% del biglietto se risposta oltre il 120° giorno
+
+SECONDA ISTANZA – ART (dopo 90 giorni dal reclamo):
+Autorità per la Regolazione dei Trasporti
+• Via Nizza n. 230 – 10126 Torino
+• Tel: +39 0111 912550
+• PEC: pec@pec.autorita-trasporti.it
+• Email: reclami.bus@autorita-trasporti.it
+• Sito: https://www.autorita-trasporti.it/modulistica/
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "rimborsi",
+                    tag: "💰 RIMBORSI",
+                    question: "Rimborso SITA Campania: quando è possibile",
+                    desc: "Rimborso solo per forza maggiore – scioperi, interruzioni viabilità. Contatti sede Salerno",
+                    keywords: "rimborso sita campania forza maggiore sciopero interruzione viabilità rimborso campania napoli salerno sita campania biglietto",
+                    text: `Gentile Cliente,
+
+Per i servizi SITA Campania il rimborso è previsto esclusivamente in caso di mancata effettuazione della corsa per motivi di forza maggiore (scioperi, agitazioni del personale, interruzioni della viabilità).
+
+⚠️ NON SONO RIMBORSABILI:
+• Biglietti smarriti
+• Biglietti rubati
+• Biglietti deteriorati o incompleti
+
+Per informazioni e procedure contattare:
+SITA Sud Trasporti S.r.l. – Sede Regionale Campania
+Via G. Pastore, 28/30 – 84131 Salerno
+Tel: 089 3866701
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "rimborsi",
+                    tag: "💰 RIMBORSI",
+                    question: "Rimborso SITA Basilicata: procedura e penali",
+                    desc: "Rimborso parziale (penale 25%) se richiesto 48h prima; nessun rimborso per biglietti acquistati il giorno prima o stesso giorno",
+                    keywords: "rimborso sita basilicata penale 25% annullamento basilicata modulo rimborso basilicata cambio data basilicata potenza matera",
+                    text: `Gentile Cliente,
+
+Le illustriamo le condizioni di rimborso per i servizi SITA Basilicata.
+
+RIMBORSO PARZIALE (penale 25%):
+• Richiesta almeno 48 ore prima della partenza
+• Compilare il modulo scaricabile dal sito
+• Inviare obbligatoriamente con il file PDF del biglietto a:
+  biglietteria.basilicata@sitasudtrasporti.it
+
+NESSUN RIMBORSO per:
+• Biglietti acquistati il giorno precedente o lo stesso giorno della partenza
+• Biglietti con data già cambiata
+• Corse interrotte per motivi non imputabili al vettore (scioperi, meteo avverso, guasti, blocchi stradali, ecc.)
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "rimborsi",
+                    tag: "💰 RIMBORSI",
+                    question: "Rimborso/Cambio data COTRAP: è possibile?",
+                    desc: "Pugliairbus: titoli non rimborsabili; riconvalida online entro 30 minuti con penale di € 1,00",
+                    keywords: "rimborso cotrap cambio data cotrap penale cotrap titolo non rimborsabile cotrap riconvalida cotrap revalidazione",
+                    text: `Gentile Cliente,
+
+I titoli di viaggio COTRAP non sono rimborsabili né sostituibili con altri.
+
+RICONVALIDA DEL BIGLIETTO ONLINE:
+• È disponibile solo sulle piattaforme abilitate
+• Deve essere effettuata entro 30 minuti prima dell'orario di partenza
+• Prevede una penale di € 1,00
+• Non può essere effettuata a bordo
+
+I titoli smarriti, rubati o deteriorati non sono rimborsabili né sostituibili.
+
+Per assistenza: (+39) 080-5790111
+
+Condizioni Pugliairbus in vigore dal 1° aprile 2026:
+https://www.cotrap.it/wp-content/uploads/2026/04/Condizioni_di_trasportoTPL-Pugliairbus2026_5.0_01-aprile-2026.pdf
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "biglietti",
+                    tag: "🎫 BIGLIETTI",
+                    question: "Tariffa Andata e Ritorno: come funziona, sconto 10%",
+                    desc: "2 biglietti (andata + ritorno) con sconto 10%; svincolati e riconvalidabili; non disponibile per tratte aeroportuali COTRAP",
+                    keywords: "andata ritorno sconto 10% tariffa A/R biglietto ritorno quanto costa andata ritorno prenotare ritorno risparmio",
+                    text: `Gentile Cliente,
+
+La tariffa ANDATA E RITORNO permette di acquistare in un'unica soluzione 2 titoli di viaggio (andata + ritorno) con uno sconto del 10%.
+
+CARATTERISTICHE:
+• Sconto del 10% rispetto alla tariffa di corsa semplice ordinaria
+• I due biglietti sono svincolati tra loro (presentabili separatamente)
+• Riconvalidabili senza limiti di data (seguendo le condizioni generali di ogni vettore)
+
+⚠️ NOTE IMPORTANTI:
+• Disponibile solo se visibile tra le opzioni proposte dal sistema in fase di prenotazione
+• NON disponibile per i collegamenti "da" e "per" gli aeroporti gestiti da COTRAP (su queste tratte è valida solo la tariffa corsa semplice)
+
+Acquisto: https://biglietteria.cotrap.it/
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "bagagli",
+                    tag: "🧳 BAGAGLI",
+                    question: "Bagagli SITA Salerno (Campania): regole specifiche",
+                    desc: "Bagaglio a mano gratuito max 50x30x25cm; ogni altro bagaglio richiede un biglietto separato",
+                    keywords: "bagaglio sita salerno campania valigia sita salerno dimensioni bagaglio sita campania borsa a bordo campania",
+                    text: `Gentile Cliente,
+
+Le comunichiamo le regole bagaglio per i servizi SITA Salerno (Campania).
+
+BAGAGLIO A MANO GRATUITO:
+• Dimensioni max: 50 x 30 x 25 cm
+• Trasportato senza custodia, sistemato dove possibile senza disturbare altri viaggiatori
+
+BAGAGLI ECCEDENTI O SUPERIORI:
+• Per ogni bagaglio che supera le dimensioni indicate è necessario acquistare un biglietto separato
+• I bagagli eccedenti vengono sistemati nel bagagliaio dal viaggiatore (solo se disponibilità di spazio e portata lo consentono)
+
+⚠️ RESPONSABILITÀ:
+• L'azienda declina ogni responsabilità per furti, manomissioni, dispersioni o deterioramenti
+• Il bagaglio NON è assicurato e viaggia a rischio e pericolo del passeggero
+• Il personale di guida non effettua servizio bagagli con registrazione
+
+Cordiali saluti,
+Servizio Clienti`
+                },
+                {
+                    category: "reclami",
+                    tag: "📋 RECLAMI",
+                    question: "Regolamento UE 181/2011 – Diritti passeggeri autobus",
+                    desc: "Sintesi diritti UE per passeggeri autobus: assistenza, rimborsi, disabili, reclami",
+                    keywords: "regolamento europeo 181 2011 diritti passeggeri autobus UE ritardo cancellazione assistenza disabili 250km normativa europea diritti bus",
+                    text: `REGOLAMENTO (UE) n. 181/2011 – DIRITTI DEI PASSEGGERI AUTOBUS
+
+I passeggeri che viaggiano in autobus nell'Unione europea godono di diritti uniformi, analoghi a quelli del trasporto aereo, ferroviario e marittimo.
+
+SERVIZI OLTRE 250 KM:
+• Assistenza adeguata (spuntini, pasti, bevande e albergo fino a 2 notti) in caso di cancellazione o ritardo superiore a 90 minuti su viaggi di oltre 3 ore
+• Rimborso o reinstradamento in caso di overbooking, cancellazione o ritardo oltre 120 minuti dall'orario previsto
+• Risarcimento del 50% del prezzo del biglietto se ritardo superiore a 120 minuti e impossibilità di reinstradamento/rimborso
+• Informazioni in caso di cancellazione o ritardo
+• Assistenza gratuita per persone con disabilità o mobilità ridotta (a bordo e in stazione); trasporto gratuito dell'accompagnatore ove necessario
+• Risarcimento per lesioni, decesso e danni causati da incidenti stradali
+
+TUTTI I SERVIZI (anche sotto 250 km):
+• Non discriminazione per cittadinanza in tariffe e condizioni contrattuali
+• Trattamento non discriminatorio per persone con disabilità
+• Risarcimento per perdita/danni alle attrezzature per la mobilità in caso di incidente
+• Informazioni sul viaggio prima e durante il trasporto
+• Meccanismo di reclamo predisposto dal vettore
+• Organismi nazionali indipendenti per l'applicazione del regolamento
+
+Decorrenza: 1° marzo 2013
+Testo ufficiale: https://www.cotrap.it/pagina/condizionidiviaggio
+
+Cordiali saluti,
+Servizio Clienti`
+                }
+            ]
+        };
+
+    </script>
+    <script src="app.js?v=3"></script>
+
+</body>
+
+</html>
