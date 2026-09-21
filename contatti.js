@@ -1,25 +1,86 @@
 /*
- * Fonte interna dei contatti esterni iniziali.
- * L'app permette anche di aggiungere e modificare contatti dall'interfaccia;
- * le modifiche vengono salvate nel browser in uso.
+ * Elenco pubblico delle 60 aziende consorziate.
+ * I referenti nominativi non devono essere inseriti in questo file pubblico:
+ * l'app li conserva esclusivamente nel browser dell'operatore.
  */
-window.DEFAULT_EXTERNAL_CONTACTS = [
-  {
-    id: "agenzia-sabato-gioia-scoppio",
-    topics: ["Scoppio", "Sabato"],
-    useCase: "Informazioni Scoppio o Sabato",
-    office: "Agenzia Sabato",
-    location: "Gioia del Colle",
-    people: ["Massimo Gagliano", "Francesco D'Aprile"],
-    phone: "080 348 2816",
-    keywords: "scoppio sabato gioia del colle agenzia informazioni",
-    message: `Gentile Cliente,
+(() => {
+  "use strict";
 
-per informazioni su Scoppio o Sabato può contattare l'Agenzia Sabato di Gioia del Colle.
+  const rows = [
+    ["acapt-nord-gargano", "Acapt Nord Gargano", "0882 643811 (clienti) · 0882 643813", "sapsacapt@tin.it", "acapt.it"],
+    ["amet", "A.M.E.T. S.p.A.", "800 250 009", "segreteria@ametspa.it", "ametspa.it"],
+    ["ataf", "Azienda Trasporti Automobilistici Foggia (ATAF)", "0881 753611 · informazioni 0881 753603 · biglietteria 0881 785674", "info@ataf.fg.it", "ataf.fg.it", ["PEC: ataf@cert.comune.foggia.it"]],
+    ["blanco", "Autolinee F.lli Blanco", "0836 541211 · 368 3162475", "blancoluciadaniela@virgilio.it", ""],
+    ["borman", "Impresa Autoservizi Borman", "0833 908065", "bormanonline@virgilio.it", "autoserviziborman.com"],
+    ["bruno-sante", "Bruno Sante – Noleggio Autobus", "0883 682634 · clienti 348 6901095", "brunobus@katamail.com", "brunobus.it"],
+    ["bucci-tarantini", "Bucci e Tarantini", "080 8724146", "", ""],
+    ["caponio", "Caponio Francesco", "080 3022886", "info@caponioviaggi.it", "caponioviaggi.it"],
+    ["caputo", "Caputo Giuseppe", "0883 663680", "info@autoservizicaputo.it", "autoservizicaputo.it"],
+    ["caruso", "Caruso Viaggi", "339 7119945", "carusoviaggi@virgilio.it", ""],
+    ["ceglie-eurobus", "Ceglie Eurobus", "080 5525535", "preventivi@cegliebus.com", "cegliebus.com"],
+    ["centra", "Centra", "0882 457910 (San Giovanni Rotondo) · 0884 663959 (Manfredonia)", "info@centraviaggievacanze.it", "centraviaggievacanze.it"],
+    ["chiarelli", "Autolinee Chiarelli Viaggi", "080 4743316 (clienti) · 339 1071124", "chiarelli.viaggi@libero.it", ""],
+    ["chiffi", "Autoservizi Chiffi", "0833 873378", "info@chiffibus.it", "chiffibus.it"],
+    ["chiriatti", "Autoservizi Chiriatti", "0836 818007", "noleggio@chiriattiviaggi.it", "chiriattiviaggi.it"],
+    ["ciccimarra", "Ciccimarra Sante & Figli", "080 4448960", "info@ciccimarrasanteviaggi.it", "ciccimarrasanteviaggi.it"],
+    ["conca", "Autoservizi Conca", "080 3237309", "mario@conca.it", "conca.it"],
+    ["ctp", "CTP", "800 23 00 83", "affarigenerali@ctptaranto.eu", "ctptaranto.it"],
+    ["ded-travel", "D&D Travel", "328 7459653", "", "dedtravel.it"],
+    ["dover", "Autolinee Dover", "080 4972767", "vimiviaggi@tiscali.it", "vimiviaggi.it"],
+    ["due-mari", "Due Mari Viaggi e Turismo", "0968 411459", "", ""],
+    ["elios", "Elios Autolinee", "0832 871153", "elios.trasporti@libero.it", "eliosautoservizi.com"],
+    ["ferrovie-gargano", "Ferrovie del Gargano", "0882 228960", "", "ferroviedelgargano.com", ["Assistenza, rimborsi e oggetti smarriti: dar@fergargano.it", "Fatture: ufficio.cp@fergargano.it"]],
+    ["ferrovie-sud-est", "Ferrovie del Sud Est", "800 079090", "fsudest@fseonline.it", "fseonline.it"],
+    ["fini", "Fini Viaggi", "0882 451385", "info@finiviaggi.it", "finiviaggi.it"],
+    ["fivi", "Fivi", "", "", "", ["PEC: fivisrl@pecaruba.it"]],
+    ["gramegna", "Gramegna Isabella", "080 3263430 · 338 2211386 · 328 6661066", "info@gramegnatpl.it", "gramegnatpl.it"],
+    ["gravame", "Gravame Palmieri", "099 5664114", "debonis.gravame@alice.it", "gravame.it"],
+    ["gigante", "Gruppo Gigante", "099 8444760", "gruppogigantesrl@gmail.com", "gruppogigante.it"],
+    ["kyma", "Kyma Mobilità", "099 7795527", "kymamobilita@kymamobilita.it", "kymamobilita.it"],
+    ["lentini", "Lentini", "080 9306860", "lentini@erediautolineelentini.com", ""],
+    ["lorusso", "Autolinee Lorusso", "080 4312460", "autolineelorusso@libero.it", ""],
+    ["lovanio", "Lovanio", "080 4770138", "", "", ["PEC: autolineelovanio@pec.it"]],
+    ["marino-michele", "Autolinee Marino Michele", "080 3112335", "info@marinobusurbano.it", "marinobusurbano.it"],
+    ["marino", "Marino S.r.l. (MarinoBus)", "080 3112335", "info@marinobus.it", "marinobus.it"],
+    ["marozzi", "Marozzi", "080 5790211", "info@marozzivt.it", "marozzivt.it", ["Rimborsi: rimborsi@marozzivt.it", "Reclami: reclami@marozzivt.it", "Noleggi: noleggi@marozzivt.it", "Fatture: fatturazione@marozzivt.it", "PEC: marozzi@pec.it"]],
+    ["martina-tours", "Martina Tours", "", "", ""],
+    ["mastrorocco", "Autolinee Mastrorocco", "080 759322", "autolineemastrorocco@alice.it", "mastroroccoviaggi.it"],
+    ["metauro", "Metauro Bus", "0881 981100", "info@metaurobus.it", "metaurobus.it"],
+    ["miccolis", "Miccolis", "080 5315334 · WhatsApp 344 2740135", "info@busmiccolis.it", "busmiccolis.it"],
+    ["re-manfredi", "Re Manfredi", "0884 543360", "consorzio@remanfredi.net", "remanfredi.net"],
+    ["roberto-dongiovanni", "Autolinee Roberto & Dongiovanni", "800 508962 · 080 4977614 · WhatsApp 347 5316558", "info@autolineedongiovanni.it", "autolineedongiovanni.it"],
+    ["sabato", "Sabato Viaggi", "080 9646047", "sabatoviaggi@libero.it", "grupposabato.it", ["Viaggi e turismo: booking@sabatoviaggi.it"]],
+    ["saps", "Saps", "0882 643812", "sapsacapt@tin.it", "sapstour.it"],
+    ["sassi", "Sassi Autotrasporti", "0883 693229", "sassigennarosnc@virgilio.it", "sassiviaggi.it"],
+    ["scoppio", "Paolo Scoppio & Figlio", "080 3482816", "sabatoviaggi@libero.it", "autolineescoppio.it"],
+    ["seat", "S.E.A.T.", "0833 544917", "seat.tricase@libero.it", "seatviaggi.it"],
+    ["sgm", "SGM", "0832 340898", "info@sgmlecce.it", "sgmlecce.it", ["Assistenza servizi online: servizionline@sgmlecce.it", "PEC: protocollosgm@legalmail.it"]],
+    ["sita-sud", "Sita Sud", "080 5790211 (Bari) · 0881 352011 (Foggia)", "info.puglia@sitasudtrasporti.it", "sitasudtrasporti.it", ["Reclami Puglia: reclami.puglia@sitasudtrasporti.it", "Fatture Puglia: fatturazione.puglia@sitasudtrasporti.it", "PEC: sitasudsrl@legalmail.it"]],
+    ["speedy", "Speedy Enterprise", "", "info@speedyenterprise.it", "", ["PEC: speedyenterprise@legalmail.it"]],
+    ["stc", "STC Cerignola", "0885 410201", "stc2010@libero.it", "comune.cerignola.fg.it"],
+    ["stp-bari", "S.T.P. Bari", "080 8807981 (lun–ven 8:00–15:00)", "stpbari@stpspa.it", "stpspa.it", ["Sede di Trani: stptrani@stpspa.it", "Assistenza clienti: contattaci@stpspa.it", "Biglietteria: biglietteria@stpspa.it"]],
+    ["stp-brindisi", "S.T.P. Brindisi", "800 232042 · 840 000575", "puntostp@stpbrindisi.it", "stpbrindisi.it"],
+    ["stp-terra-otranto", "S.T.P. Terra d'Otranto", "0832 224411 · numero verde 800 447472", "info@stplecce.it", "stplecce.it"],
+    ["strecapede", "Strecapede Giuseppe", "330 657019", "", ""],
+    ["fratelli-tarantini", "Autoservizi F.lli Tarantini", "080 8984723", "info@restaviaggi.it", "restaviaggi.it"],
+    ["tempesta", "Autoservizi Tempesta", "080 5219172", "info@autoservizitempesta.it", "autoservizitempesta.it"],
+    ["tommasulo", "Autoservizi Tommasulo", "0881 967106", "info@tommasulo.it", "tommasulo.it"],
+    ["topputo", "Topputo Vito", "080 3253410", "autoservizi@topputo.com", "topputo.com"],
+    ["zecca", "Zecca Pietro", "0832 925051", "zecca.pietro@libero.it", ""]
+  ];
 
-Referenti: Massimo Gagliano e Francesco D'Aprile
-Telefono: 080 348 2816
-
-Cordiali saluti`
-  }
-];
+  window.DEFAULT_EXTERNAL_CONTACTS = rows.map(([id, office, phone, email, site, otherEmails = []]) => ({
+    id,
+    topics: ["Aziende consorziate"],
+    useCase: "Informazioni sul servizio dell'azienda",
+    office,
+    location: "",
+    phone,
+    email,
+    otherEmails,
+    site,
+    internalPeople: [],
+    keywords: `${office} vettore azienda biglietti abbonamenti rimborsi reclami oggetti smarriti`,
+    message: ""
+  }));
+})();

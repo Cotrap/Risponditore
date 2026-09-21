@@ -1,7 +1,8 @@
 (() => {
   "use strict";
 
-  const STORAGE_KEY = "risponditore.externalContacts.v1";
+  const STORAGE_KEY = "risponditore.externalContacts.v2";
+  const LEGACY_STORAGE_KEY = "risponditore.externalContacts.v1";
   const responseCategoryIds = [...new Set([
     ...Object.keys(CAT_META),
     ...responses.cotrap.map((response) => response.category)
@@ -56,6 +57,8 @@
     copyPhone: document.getElementById("copy-phone"),
     editContact: document.getElementById("edit-contact"),
     addContact: document.getElementById("add-contact"),
+    importInternalContacts: document.getElementById("import-internal-contacts"),
+    internalContactsFile: document.getElementById("internal-contacts-file"),
     editor: document.getElementById("contact-editor"),
     editorForm: document.getElementById("contact-editor-form"),
     editorTitle: document.getElementById("contact-editor-title"),
@@ -106,6 +109,8 @@
       if (contact) openContactEditor(contact);
     });
     elements.addContact.addEventListener("click", () => openContactEditor());
+    elements.importInternalContacts.addEventListener("click", () => elements.internalContactsFile.click());
+    elements.internalContactsFile.addEventListener("change", importInternalContacts);
 
     elements.editorForm.addEventListener("submit", saveContactFromEditor);
     elements.editorCancel.addEventListener("click", closeContactEditor);
@@ -313,8 +318,11 @@
         contact.useCase,
         contact.office,
         contact.location,
-        (contact.people || []).join(" "),
+        (contact.internalPeople || []).join(" "),
         contact.phone,
+        contact.email,
+        (contact.otherEmails || []).join(" "),
+        contact.site,
         (contact.topics || []).join(" "),
         contact.keywords,
         contact.message
@@ -344,17 +352,14 @@
         <button class="contact-row${contact.id === state.selectedContactId ? " selected" : ""}"
           type="button" role="option" aria-selected="${contact.id === state.selectedContactId}"
           data-contact-id="${escapeAttribute(contact.id)}">
-          <span class="contact-cell" data-label="Quando usarlo"><strong>${escapeHtml(contact.useCase)}</strong></span>
-          <span class="contact-cell" data-label="Azienda / ufficio"><strong>${escapeHtml(contact.office)}</strong>${contact.location ? `<br>${escapeHtml(contact.location)}` : ""}</span>
-          <span class="contact-cell" data-label="Referenti">${(contact.people || []).map(escapeHtml).join("<br>") || "—"}</span>
-          <span class="contact-cell contact-phone" data-label="Telefono">${phoneIcon()} ${escapeHtml(contact.phone || "—")}</span>
+          <span class="contact-cell" data-label="Azienda"><strong>${escapeHtml(contact.office)}</strong>${contact.location ? `<br>${escapeHtml(contact.location)}` : ""}</span>
+          <span class="contact-cell contact-phone" data-label="Telefono pubblico">${phoneIcon()} ${escapeHtml(contact.phone || "Non pubblicato")}</span>
+          <span class="contact-cell" data-label="Email principale">${escapeHtml(contact.email || "Non pubblicata")}</span>
+          <span class="contact-cell" data-label="Referenti interni">${(contact.internalPeople || []).length ? `${contact.internalPeople.length} presenti` : "Da inserire"}</span>
         </button>`;
     }).join("");
 
-    const continuation = state.contacts.length === 1 && !elements.contactSearch.value
-      ? `<div class="empty-state">Qui compariranno i prossimi contatti.</div>`
-      : "";
-    elements.contactList.innerHTML = rows + continuation;
+    elements.contactList.innerHTML = rows;
     elements.contactList.querySelectorAll("[data-contact-id]").forEach((button) => {
       button.addEventListener("click", () => {
         state.selectedContactId = button.dataset.contactId;
@@ -378,9 +383,14 @@
 
     elements.contactTitle.textContent = "Messaggio per il cliente";
     elements.contactMessage.innerHTML = renderRichText(contact.message || buildDefaultContactMessage(contact));
+    const publicEmails = [contact.email, ...(contact.otherEmails || [])].filter(Boolean);
+    const internalPeople = (contact.internalPeople || []).map((person) => `<li>${escapeHtml(person)}</li>`).join("");
     elements.contactMeta.innerHTML = `
       <div class="meta-block"><span>Azienda / ufficio</span><strong>${escapeHtml([contact.office, contact.location].filter(Boolean).join(" · "))}</strong></div>
-      <div class="meta-block"><span>Telefono</span><strong>${escapeHtml(contact.phone || "—")}</strong></div>`;
+      <div class="meta-block"><span>Telefono pubblico</span><strong>${escapeHtml(contact.phone || "Non pubblicato")}</strong></div>
+      <div class="meta-block"><span>Email pubbliche</span><strong>${publicEmails.map(escapeHtml).join("<br>") || "Non pubblicate"}</strong></div>
+      <div class="meta-block"><span>Sito</span><strong>${escapeHtml(contact.site || "Non pubblicato")}</strong></div>
+      <div class="meta-block internal-contact-block"><span>Uso interno · solo in questo browser</span>${internalPeople ? `<ul>${internalPeople}</ul>` : "<strong>Nessun referente nominativo inserito</strong>"}</div>`;
     elements.copyContact.disabled = false;
     elements.copyPhone.disabled = !contact.phone;
     elements.editContact.disabled = false;
@@ -407,8 +417,11 @@
     elements.editorForm.elements.topics.value = (contact?.topics || []).join(", ");
     elements.editorForm.elements.office.value = contact?.office || "";
     elements.editorForm.elements.location.value = contact?.location || "";
-    elements.editorForm.elements.people.value = (contact?.people || []).join("\n");
+    elements.editorForm.elements.internalPeople.value = (contact?.internalPeople || []).join("\n");
     elements.editorForm.elements.phone.value = contact?.phone || "";
+    elements.editorForm.elements.email.value = contact?.email || "";
+    elements.editorForm.elements.otherEmails.value = (contact?.otherEmails || []).join("\n");
+    elements.editorForm.elements.site.value = contact?.site || "";
     elements.editorForm.elements.keywords.value = contact?.keywords || "";
     elements.editorForm.elements.message.value = contact?.message || "";
     elements.editorTitle.textContent = contact ? "Modifica contatto" : "Nuovo contatto";
@@ -432,8 +445,11 @@
       useCase: form.useCase.value.trim(),
       office: form.office.value.trim(),
       location: form.location.value.trim(),
-      people: splitList(form.people.value, /[,;\n]+/),
+      internalPeople: splitList(form.internalPeople.value, /\n+/),
       phone: form.phone.value.trim(),
+      email: form.email.value.trim(),
+      otherEmails: splitList(form.otherEmails.value, /\n+/),
+      site: form.site.value.trim(),
       keywords: form.keywords.value.trim(),
       message: form.message.value.trim()
     };
@@ -485,12 +501,75 @@
     const defaults = cloneContacts(window.DEFAULT_EXTERNAL_CONTACTS || []);
     try {
       const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY));
-      if (!Array.isArray(saved)) return defaults;
-      const valid = saved.filter((item) => item && typeof item.id === "string" && typeof item.useCase === "string");
-      return valid.length ? valid : defaults;
+      if (Array.isArray(saved)) {
+        const savedById = new Map(saved.filter(isValidContact).map((item) => [item.id, item]));
+        const merged = defaults.map((item) => normalizeContact({ ...item, ...(savedById.get(item.id) || {}) }));
+        saved.filter((item) => isValidContact(item) && !defaults.some((base) => base.id === item.id))
+          .forEach((item) => merged.push(normalizeContact(item)));
+        return merged;
+      }
+
+      const legacy = JSON.parse(window.localStorage.getItem(LEGACY_STORAGE_KEY));
+      if (Array.isArray(legacy)) {
+        const formerAgency = legacy.find((item) => item?.id === "agenzia-sabato-gioia-scoppio");
+        const names = splitList((formerAgency?.people || []).join("\n"), /\n+/);
+        if (names.length) {
+          defaults.filter((item) => ["sabato", "scoppio"].includes(item.id))
+            .forEach((item) => { item.internalPeople = names; });
+        }
+      }
+      return defaults.map(normalizeContact);
     } catch {
-      return defaults;
+      return defaults.map(normalizeContact);
     }
+  }
+
+  function isValidContact(item) {
+    return Boolean(item && typeof item.id === "string" && typeof item.useCase === "string");
+  }
+
+  function normalizeContact(contact) {
+    return {
+      ...contact,
+      topics: Array.isArray(contact.topics) ? contact.topics : [],
+      internalPeople: Array.isArray(contact.internalPeople) ? contact.internalPeople : (Array.isArray(contact.people) ? contact.people : []),
+      otherEmails: Array.isArray(contact.otherEmails) ? contact.otherEmails : [],
+      phone: contact.phone || "",
+      email: contact.email || "",
+      site: contact.site || ""
+    };
+  }
+
+  async function importInternalContacts(event) {
+    const [file] = event.target.files || [];
+    event.target.value = "";
+    if (!file) return;
+    try {
+      const data = JSON.parse(await file.text());
+      if (!Array.isArray(data)) throw new Error("Formato non valido");
+      let updated = 0;
+      data.forEach((entry) => {
+        if (!entry || typeof entry !== "object") return;
+        const key = normalizeSearchText(entry.id || entry.office || entry.company || "");
+        const contact = state.contacts.find((item) => item.id === entry.id || normalizeSearchText(item.office) === key);
+        if (!contact) return;
+        const people = Array.isArray(entry.internalPeople) ? entry.internalPeople : (Array.isArray(entry.contacts) ? entry.contacts : []);
+        contact.internalPeople = people.map(formatInternalPerson).filter(Boolean);
+        updated += 1;
+      });
+      if (!updated) throw new Error("Nessuna azienda riconosciuta");
+      saveContacts();
+      filterContacts();
+      showToast(`${updated} ${updated === 1 ? "azienda aggiornata" : "aziende aggiornate"}`);
+    } catch {
+      showToast("File non valido: controlla nomi delle aziende e formato JSON");
+    }
+  }
+
+  function formatInternalPerson(person) {
+    if (typeof person === "string") return person.trim();
+    if (!person || typeof person !== "object") return "";
+    return [person.name, person.role, person.email, person.phone].map((value) => String(value || "").trim()).filter(Boolean).join(" — ");
   }
 
   function saveContacts() {
@@ -572,16 +651,26 @@
 
   function buildDefaultContactMessage(contact) {
     const office = [contact.office, contact.location ? `di ${contact.location}` : ""].filter(Boolean).join(" ");
-    const people = (contact.people || []).join(" e ");
+    const contacts = [
+      contact.phone ? `Telefono: ${contact.phone}` : "",
+      contact.email ? `Email: ${contact.email}` : "",
+      ...(contact.otherEmails || []),
+      contact.site ? `Sito: ${normalizeWebsite(contact.site)}` : ""
+    ].filter(Boolean);
     return [
       "Gentile Cliente,",
       "",
       `per ${contact.useCase.toLowerCase()} può contattare ${office}.`,
-      people ? `Referenti: ${people}` : "",
-      contact.phone ? `Telefono: ${contact.phone}` : "",
+      "",
+      ...(contacts.length ? contacts : ["Al momento non risultano recapiti pubblici verificati. Consulti la scheda dell'azienda sul sito COTRAP."]),
       "",
       "Cordiali saluti"
     ].filter((line, index, all) => line || (index > 0 && all[index - 1] !== "")).join("\n");
+  }
+
+  function normalizeWebsite(site) {
+    if (!site) return "";
+    return /^https?:\/\//i.test(site) ? site : `https://${site.replace(/^www\./i, "")}`;
   }
 
   function splitList(value, separator) {

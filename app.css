@@ -579,6 +579,7 @@ a:focus-visible {
   color: #2e333c;
   font-size: 14px;
   line-height: 1.42;
+  overflow-wrap: anywhere;
 }
 
 .contact-cell strong {
@@ -625,6 +626,19 @@ a:focus-visible {
   display: block;
   margin-top: 3px;
   font-size: 14px;
+}
+
+.internal-contact-block {
+  grid-column: 1 / -1;
+  border-color: #d7c79b;
+  background: #fffaf0;
+}
+
+.internal-contact-block ul {
+  margin: 7px 0 0;
+  padding-left: 19px;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .dialog {
@@ -861,6 +875,16 @@ a:focus-visible {
     font-weight: 800;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+  }
+
+  .contact-phone {
+    display: block;
+    white-space: normal;
+  }
+
+  .contact-phone .icon {
+    margin-right: 5px;
+    vertical-align: -4px;
   }
 
   .detail-actions {
