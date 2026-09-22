@@ -60,7 +60,7 @@
     ["stc", "STC Cerignola", "0885 410201", "stc2010@libero.it", "comune.cerignola.fg.it"],
     ["stp-bari", "S.T.P. Bari", "080 8807981 (lun–ven 8:00–15:00)", "stpbari@stpspa.it", "stpspa.it", ["Sede di Trani: stptrani@stpspa.it", "Assistenza clienti: contattaci@stpspa.it", "Biglietteria: biglietteria@stpspa.it"]],
     ["stp-brindisi", "S.T.P. Brindisi", "800 232042 · 840 000575", "puntostp@stpbrindisi.it", "stpbrindisi.it"],
-    ["stp-terra-otranto", "S.T.P. Terra d'Otranto", "0832 224411 · numero verde 800 447472 · titoli gratuiti per persone con disabilità: 0832 224451 / 0832 224452", "info@stplecce.it", "stplecce.it"],
+    ["stp-terra-otranto", "S.T.P. Terra d'Otranto", "0832 224411 · numero verde 800 447472 · titoli gratuiti per persone con disabilità: 0832 224451 / 0832 224452", "info@stplecce.it", "stplecce.it", [], "STP Lecce Lecce invalidi disabili titoli gratuiti"],
     ["strecapede", "Strecapede Giuseppe", "330 657019", "", ""],
     ["fratelli-tarantini", "Autoservizi F.lli Tarantini", "080 8984723", "info@restaviaggi.it", "restaviaggi.it"],
     ["tempesta", "Autoservizi Tempesta", "080 5219172", "info@autoservizitempesta.it", "autoservizitempesta.it"],
@@ -69,7 +69,7 @@
     ["zecca", "Zecca Pietro", "0832 925051", "zecca.pietro@libero.it", ""]
   ];
 
-  window.DEFAULT_EXTERNAL_CONTACTS = rows.map(([id, office, phone, email, site, otherEmails = []]) => ({
+  window.DEFAULT_EXTERNAL_CONTACTS = rows.map(([id, office, phone, email, site, otherEmails = [], extraKeywords = ""]) => ({
     id,
     topics: ["Aziende consorziate"],
     useCase: "Informazioni sul servizio dell'azienda",
@@ -80,7 +80,7 @@
     otherEmails,
     site,
     internalPeople: [],
-    keywords: `${office} vettore azienda biglietti abbonamenti rimborsi reclami oggetti smarriti`,
+    keywords: `${office} vettore azienda biglietti abbonamenti rimborsi reclami oggetti smarriti ${extraKeywords}`.trim(),
     message: ""
   }));
 })();

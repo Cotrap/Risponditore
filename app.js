@@ -3,6 +3,53 @@
 
   const STORAGE_KEY = "risponditore.externalContacts.v2";
   const LEGACY_STORAGE_KEY = "risponditore.externalContacts.v1";
+  const SEARCH_STOP_WORDS = new Set([
+    "a", "ad", "al", "alla", "alle", "allo", "ai", "agli", "da", "dal", "dalla", "dalle", "dallo",
+    "di", "del", "della", "delle", "dello", "dei", "degli", "e", "ed", "il", "lo", "la", "i", "gli",
+    "le", "in", "nel", "nella", "nelle", "nello", "nei", "negli", "con", "per", "su", "sul", "sulla", "sulle",
+    "sullo", "sui", "sugli", "un", "uno", "una",
+    "o", "oppure", "che", "chi", "come", "cosa", "dove", "quando", "quanto", "quale", "quali", "perche",
+    "posso", "potrei", "devo", "deve", "vorrei", "voglio", "fare", "faccio", "serve", "servono", "ottenere",
+    "ottengo", "mi", "mio", "mia", "miei", "mie", "ho", "hai", "ha", "hanno", "sono", "si", "non", "troppi",
+    "troppe", "questo", "questa", "quello", "quella"
+  ]);
+  const SEARCH_EQUIVALENT_GROUPS = [
+    ["reclamo", "reclami", "segnalazione", "segnalazioni", "lamentela", "lamentele", "disservizio", "disservizi"],
+    ["rimborso", "rimborsi", "rimborsare", "restituzione", "restituzioni", "restituire", "storno"],
+    ["biglietto", "biglietti", "ticket", "titolo", "titoli"],
+    ["abbonamento", "abbonamenti", "pass"],
+    ["tessera", "tessere", "card", "mycard"],
+    ["orario", "orari", "partenza", "partenze"],
+    ["fermata", "fermate", "capolinea", "stazione"],
+    ["corsa", "corse", "bus", "autobus", "pullman", "mezzo", "mezzi"],
+    ["azienda", "aziende", "vettore", "vettori", "operatore", "operatori", "compagnia", "compagnie"],
+    ["telefono", "telefonico", "telefonica", "chiamare", "contatto", "contatti"],
+    ["email", "mail", "posta"],
+    ["smarrito", "smarrita", "smarriti", "smarrite", "perso", "persa", "persi", "perse", "dimenticato", "dimenticata", "dimenticati", "dimenticate"],
+    ["bagaglio", "bagagli", "valigia", "valigie", "borsa", "borse", "zaino", "zaini"],
+    ["animale", "animali", "cane", "cani", "gatto", "gatti"],
+    ["bambino", "bambina", "bambini", "bambine", "minore", "minori", "neonato", "neonati", "figlio", "figli"],
+    ["disabile", "disabili", "disabilita", "invalidita", "invalido", "invalidi", "handicap", "104"],
+    ["studente", "studentessa", "studenti", "studentesse", "universitario", "universitari"],
+    ["aeroporto", "aeroporti", "aeroportuale", "aeroportuali", "volo", "voli", "aereo"],
+    ["sciopero", "scioperi", "agitazione", "agitazioni", "protesta"],
+    ["app", "applicazione", "applicazioni", "smartphone", "cellulare"],
+    ["cancellazione", "cancellazioni", "cancellato", "cancellata", "annullamento", "annullamenti", "annullato", "annullata", "soppresso", "soppressa"],
+    ["ritardo", "ritardi", "ritardato", "ritardata"],
+    ["gratis", "gratuito", "gratuita", "gratuiti", "gratuite", "esenzione"],
+    ["acquistare", "acquisto", "comprare", "compra", "vendita"],
+    ["prenotazione", "prenotazioni", "prenotare", "riserva", "riservare"],
+    ["pagamento", "pagamenti", "pagare", "transazione", "transazioni"],
+    ["duplicato", "duplicati", "rifare", "sostituzione"],
+    ["convalida", "convalidare", "obliterare", "obliterazione"],
+    ["visualizzare", "vedere", "mostrare", "compare", "apparire"],
+    ["bloccato", "bloccata", "bloccati", "bloccate", "blocca", "blocco", "crash"],
+    ["home", "iniziale"]
+  ];
+  const SEARCH_EQUIVALENTS = new Map();
+  SEARCH_EQUIVALENT_GROUPS.forEach((group) => {
+    group.forEach((term) => SEARCH_EQUIVALENTS.set(term, group));
+  });
   const responseCategoryIds = [...new Set([
     ...Object.keys(CAT_META),
     ...responses.cotrap.map((response) => response.category)
@@ -164,23 +211,23 @@
 
   function filterResponses() {
     const source = responses.cotrap;
-    const query = normalizeSearchText(elements.responseSearch.value);
-    const words = query.split(/\s+/).filter(Boolean);
+    const search = createSearchQuery(elements.responseSearch.value);
     const selectedFilter = RESPONSE_FILTERS.find((filter) => filter.id === state.responseFilter) || RESPONSE_FILTERS[0];
-    const matches = [];
+    const candidates = [];
 
     source.forEach((response, index) => {
       if (selectedFilter.categories && !selectedFilter.categories.includes(response.category)) return;
-      const blob = normalizeSearchText([
+      const document = createSearchDocument([
         response.question,
         response.desc,
         response.keywords,
         response.text
-      ].join(" "));
-      if (words.length && !words.every((word) => blob.includes(word))) return;
-      matches.push({ index, score: scoreResponse(response, words, query) });
+      ]);
+      const coverage = countSearchCoverage(document, search.terms);
+      candidates.push({ index, coverage, score: scoreResponse(response, search) });
     });
 
+    const matches = selectSearchMatches(candidates, search.terms.length);
     matches.sort((a, b) => b.score - a.score || a.index - b.index);
     state.responseIndices = matches.map((match) => match.index);
     if (!state.responseIndices.includes(state.selectedResponseIndex)) {
@@ -309,12 +356,12 @@
   }
 
   function filterContacts() {
-    const query = normalizeSearchText(elements.contactSearch.value);
-    const words = query.split(/\s+/).filter(Boolean);
+    const search = createSearchQuery(elements.contactSearch.value);
+    const candidates = [];
 
-    state.contactIds = state.contacts.filter((contact) => {
+    state.contacts.forEach((contact, index) => {
       if (state.contactFilter !== "all" && !(contact.topics || []).includes(state.contactFilter)) return false;
-      const blob = normalizeSearchText([
+      const document = createSearchDocument([
         contact.useCase,
         contact.office,
         contact.location,
@@ -325,10 +372,20 @@
         contact.site,
         (contact.topics || []).join(" "),
         contact.keywords,
+        getContactSearchLabels(contact),
         contact.message
-      ].join(" "));
-      return words.every((word) => blob.includes(word));
-    }).map((contact) => contact.id);
+      ]);
+      candidates.push({
+        id: contact.id,
+        index,
+        coverage: countSearchCoverage(document, search.terms),
+        score: scoreContact(contact, search)
+      });
+    });
+
+    const matches = selectSearchMatches(candidates, search.terms.length);
+    matches.sort((a, b) => b.score - a.score || a.index - b.index);
+    state.contactIds = matches.map((match) => match.id);
 
     if (!state.contactIds.includes(state.selectedContactId)) {
       state.selectedContactId = state.contactIds[0] ?? null;
@@ -603,20 +660,177 @@
       .trim();
   }
 
-  function scoreResponse(response, words, query) {
-    if (!words.length) return 0;
-    const title = normalizeSearchText(response.question);
-    const description = normalizeSearchText(response.desc);
-    const keywords = normalizeSearchText(response.keywords);
-    const body = normalizeSearchText(response.text);
-    let score = title.includes(query) ? 140 : 0;
-    words.forEach((word) => {
-      if (title.includes(word)) score += 60;
-      if (keywords.includes(word)) score += 32;
-      if (description.includes(word)) score += 16;
-      if (body.includes(word)) score += 4;
+  function tokenizeSearchText(value) {
+    const normalized = normalizeSearchText(value);
+    const words = normalized
+      .replace(/[^a-z0-9]+/g, " ")
+      .split(/\s+/)
+      .filter(Boolean);
+    return [...new Set([...words, ...extractCompactAcronyms(normalized)])];
+  }
+
+  function createSearchQuery(value) {
+    const normalized = normalizeSearchText(value);
+    const originalTerms = tokenizeSearchText(value);
+    const meaningfulTerms = originalTerms.filter((term) => !SEARCH_STOP_WORDS.has(term));
+    const terms = meaningfulTerms.length ? meaningfulTerms : originalTerms;
+    const conceptKeys = new Set();
+    return {
+      normalized,
+      terms: terms.filter((term) => {
+        const equivalents = SEARCH_EQUIVALENTS.get(term);
+        const key = equivalents ? `group:${equivalents[0]}` : `term:${stemSearchToken(term)}`;
+        if (conceptKeys.has(key)) return false;
+        conceptKeys.add(key);
+        return true;
+      })
+    };
+  }
+
+  function createSearchDocument(parts) {
+    const text = (Array.isArray(parts) ? parts : [parts]).filter(Boolean).join(" ");
+    const compactNumbers = extractCompactNumbers(text);
+    const tokens = [...new Set([...tokenizeSearchText(text), ...compactNumbers])];
+    return {
+      normalized: [normalizeSearchText(text), ...compactNumbers].filter(Boolean).join(" "),
+      tokens,
+      tokenSet: new Set(tokens)
+    };
+  }
+
+  function extractCompactNumbers(value) {
+    const matches = String(value || "").match(/(?:\+?\d[\d\s()./-]{5,}\d)/g) || [];
+    return [...new Set(matches.map((match) => match.replace(/\D/g, "")).filter((digits) => digits.length >= 7))];
+  }
+
+  function extractCompactAcronyms(value) {
+    const matches = String(value || "").match(/\b(?:[a-z]\.){2,}[a-z]?\.?/g) || [];
+    return [...new Set(matches.map((match) => match.replace(/[^a-z]/g, "")).filter((term) => term.length >= 2))];
+  }
+
+  function getSearchVariants(term) {
+    const equivalents = SEARCH_EQUIVALENTS.get(term) || [];
+    return [term, ...equivalents.filter((variant) => variant !== term)];
+  }
+
+  function stemSearchToken(term) {
+    if (!/^[a-z]+$/.test(term) || term.length < 5) return term;
+    const stem = term.replace(/[aeiou]+$/g, "");
+    return stem.length >= 4 ? stem : term;
+  }
+
+  function matchSearchTerm(term, document) {
+    let best = 0;
+    const variants = getSearchVariants(term);
+
+    variants.forEach((variant) => {
+      if (document.tokenSet.has(variant)) {
+        best = Math.max(best, 4);
+        return;
+      }
+
+      const variantStem = stemSearchToken(variant);
+      document.tokens.forEach((token) => {
+        if (variant.length >= 4 && token.startsWith(variant)) {
+          best = Math.max(best, 3);
+        } else if (variantStem.length >= 4 && variantStem === stemSearchToken(token)) {
+          best = Math.max(best, 3);
+        }
+      });
     });
+
+    if (best || !/^[a-z]+$/.test(term) || term.length < 5) return best;
+    const tolerance = term.length >= 9 ? 2 : 1;
+    const fuzzyMatch = document.tokens.some((token) => {
+      if (!/^[a-z]+$/.test(token) || token[0] !== term[0] || Math.abs(token.length - term.length) > tolerance) return false;
+      return damerauLevenshtein(term, token, tolerance) <= tolerance;
+    });
+    return fuzzyMatch ? 1 : 0;
+  }
+
+  function countSearchCoverage(document, terms) {
+    if (!terms.length) return 0;
+    return terms.reduce((count, term) => count + (matchSearchTerm(term, document) ? 1 : 0), 0);
+  }
+
+  function selectSearchMatches(candidates, termCount) {
+    if (!termCount) return candidates;
+    const completeMatches = candidates.filter((candidate) => candidate.coverage === termCount);
+    if (completeMatches.length) return completeMatches;
+    const minimumCoverage = Math.max(1, Math.ceil(termCount * 0.5));
+    return candidates.filter((candidate) => candidate.coverage >= minimumCoverage);
+  }
+
+  function scoreSearchField(value, terms, weight) {
+    if (!terms.length) return 0;
+    const document = createSearchDocument(value);
+    return terms.reduce((score, term) => score + matchSearchTerm(term, document) * weight, 0);
+  }
+
+  function scoreResponse(response, search) {
+    if (!search.terms.length) return 0;
+    const title = normalizeSearchText(response.question);
+    let score = search.normalized && title.includes(search.normalized) ? 180 : 0;
+    score += scoreSearchField(response.question, search.terms, 18);
+    score += scoreSearchField(response.keywords, search.terms, 10);
+    score += scoreSearchField(response.desc, search.terms, 5);
+    score += scoreSearchField(response.text, search.terms, 1);
     return score;
+  }
+
+  function scoreContact(contact, search) {
+    if (!search.terms.length) return 0;
+    const office = normalizeSearchText(contact.office);
+    let score = search.normalized && office.includes(search.normalized) ? 180 : 0;
+    score += scoreSearchField(contact.office, search.terms, 18);
+    score += scoreSearchField(contact.location, search.terms, 12);
+    score += scoreSearchField((contact.internalPeople || []).join(" "), search.terms, 10);
+    score += scoreSearchField([contact.phone, contact.email, ...(contact.otherEmails || [])].join(" "), search.terms, 10);
+    score += scoreSearchField([(contact.topics || []).join(" "), contact.keywords, contact.useCase, getContactSearchLabels(contact)].join(" "), search.terms, 8);
+    score += scoreSearchField(contact.message, search.terms, 1);
+    return score;
+  }
+
+  function getContactSearchLabels(contact) {
+    const labels = [];
+    if (contact.phone) labels.push("telefono numero chiamare");
+    if (contact.email || (contact.otherEmails || []).length) labels.push("email mail posta");
+    if ([contact.email, ...(contact.otherEmails || [])].join(" ").toLowerCase().includes("pec")) labels.push("pec");
+    if (contact.site) labels.push("sito web");
+    return labels.join(" ");
+  }
+
+  function damerauLevenshtein(left, right, maxDistance) {
+    if (Math.abs(left.length - right.length) > maxDistance) return maxDistance + 1;
+    let previousPrevious = null;
+    let previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+
+    for (let row = 1; row <= left.length; row += 1) {
+      const current = [row];
+      let rowMinimum = current[0];
+      for (let column = 1; column <= right.length; column += 1) {
+        const substitutionCost = left[row - 1] === right[column - 1] ? 0 : 1;
+        let distance = Math.min(
+          current[column - 1] + 1,
+          previous[column] + 1,
+          previous[column - 1] + substitutionCost
+        );
+        if (
+          previousPrevious && row > 1 && column > 1 &&
+          left[row - 1] === right[column - 2] &&
+          left[row - 2] === right[column - 1]
+        ) {
+          distance = Math.min(distance, previousPrevious[column - 2] + 1);
+        }
+        current[column] = distance;
+        rowMinimum = Math.min(rowMinimum, distance);
+      }
+      if (rowMinimum > maxDistance) return maxDistance + 1;
+      previousPrevious = previous;
+      previous = current;
+    }
+
+    return previous[right.length];
   }
 
   function renderRichText(plain) {
