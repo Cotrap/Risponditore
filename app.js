@@ -8,7 +8,8 @@
     "di", "del", "della", "delle", "dello", "dei", "degli", "e", "ed", "il", "lo", "la", "i", "gli",
     "le", "in", "nel", "nella", "nelle", "nello", "nei", "negli", "con", "per", "su", "sul", "sulla", "sulle",
     "sullo", "sui", "sugli", "un", "uno", "una",
-    "o", "oppure", "che", "chi", "come", "cosa", "dove", "quando", "quanto", "quale", "quali", "perche",
+    "o", "oppure", "che", "chi", "come", "cosa", "dove", "quando", "quanto", "quale", "quali", "perche", "salve",
+    "anche", "se", "quindi", "dovrei", "poterlo", "altro",
     "posso", "potrei", "devo", "deve", "vorrei", "voglio", "fare", "faccio", "serve", "servono", "ottenere",
     "ottengo", "mi", "mio", "mia", "miei", "mie", "ho", "hai", "ha", "hanno", "sono", "si", "non", "troppi",
     "troppe", "questo", "questa", "quello", "quella"
@@ -38,13 +39,15 @@
     ["ritardo", "ritardi", "ritardato", "ritardata"],
     ["gratis", "gratuito", "gratuita", "gratuiti", "gratuite", "esenzione"],
     ["acquistare", "acquisto", "comprare", "compra", "vendita"],
-    ["prenotazione", "prenotazioni", "prenotare", "riserva", "riservare"],
+    ["prenotazione", "prenotazioni", "prenotare", "prenotato", "prenotata", "prenotarlo", "prenotarla", "riserva", "riservare"],
     ["pagamento", "pagamenti", "pagare", "transazione", "transazioni"],
     ["duplicato", "duplicati", "rifare", "sostituzione"],
     ["convalida", "convalidare", "obliterare", "obliterazione"],
     ["visualizzare", "vedere", "mostrare", "compare", "apparire"],
     ["bloccato", "bloccata", "bloccati", "bloccate", "blocca", "blocco", "crash"],
-    ["home", "iniziale"]
+    ["home", "iniziale"],
+    ["usare", "usato", "usata", "usati", "usate", "usarlo", "usarla", "utilizzare", "utilizzato", "utilizzata"],
+    ["data", "date", "giorno", "giorni", "oggi", "domani", "dopodomani"]
   ];
   const SEARCH_EQUIVALENTS = new Map();
   SEARCH_EQUIVALENT_GROUPS.forEach((group) => {
